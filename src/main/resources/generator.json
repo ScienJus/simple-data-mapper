@@ -1,0 +1,15 @@
+{
+  "dataSource" : {
+    "driver": "com.mysql.jdbc.Driver",
+    "url": "jdbc:mysql://127.0.0.1:3306/demo?remarksReporting=true&useInformationSchema=true",
+    "username" : "root",
+    "password" : "root"
+  },
+  "packages" : {
+    "domain" : "com.scienjus.domain",
+    "dao" : "com.scienjus.dao",
+    "daoImpl" : "com.scienjus.dao.impl"
+  },
+  "tables" : ["user_"],
+  "path" : "D:/"
+}
