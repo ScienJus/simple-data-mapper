@@ -9,4 +9,6 @@ public @interface Table {
     public String name();
 
     public String[] keys();
+
+    public String selectSQL();
 }

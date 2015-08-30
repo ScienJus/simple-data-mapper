@@ -1,4 +1,4 @@
-package com.scienjus.tools;
+package com.scienjus.generator.meta;
 
 /**
  * @author XieEnlong

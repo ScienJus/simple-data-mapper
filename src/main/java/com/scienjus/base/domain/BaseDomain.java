@@ -1,5 +1,6 @@
 package com.scienjus.base.domain;
 
+import java.sql.ResultSet;
 import java.util.LinkedHashMap;
 
 /**
@@ -9,6 +10,10 @@ import java.util.LinkedHashMap;
 public class BaseDomain {
 
     protected LinkedHashMap<String, Object> changeFields = new LinkedHashMap<>();
+
+    public BaseDomain(){}
+
+    public BaseDomain(ResultSet rs) {}
 
     public LinkedHashMap<String, Object> getChangeFields() {
         return changeFields;

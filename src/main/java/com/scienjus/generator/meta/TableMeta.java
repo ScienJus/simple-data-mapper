@@ -1,4 +1,6 @@
-package com.scienjus.tools;
+package com.scienjus.generator.meta;
+
+import com.scienjus.generator.meta.FieldMeta;
 
 import java.util.List;
 

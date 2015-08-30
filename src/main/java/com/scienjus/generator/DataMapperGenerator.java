@@ -1,6 +1,11 @@
-package com.scienjus.tools;
+package com.scienjus.generator;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.scienjus.generator.config.DataSource;
+import com.scienjus.generator.config.Generator;
+import com.scienjus.generator.config.Packages;
+import com.scienjus.generator.meta.FieldMeta;
+import com.scienjus.generator.meta.TableMeta;
 
 import java.io.*;
 import java.net.URL;
