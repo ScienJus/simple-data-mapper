@@ -1,7 +1,7 @@
 {
   "dataSource" : {
     "driver": "com.mysql.jdbc.Driver",
-    "url": "jdbc:mysql://127.0.0.1:3306/demo?remarksReporting=true&useInformationSchema=true",
+    "url": "jdbc:mysql://127.0.0.1:3306/triphare_1?remarksReporting=true&useInformationSchema=true",
     "username" : "root",
     "password" : "root"
   },
@@ -10,6 +10,6 @@
     "dao" : "com.scienjus.dao",
     "daoImpl" : "com.scienjus.dao.impl"
   },
-  "tables" : ["user_"],
+  "tables" : ["user_", "acount_", "note_info", "praise_", "fans_", "together_"],
   "path" : "D:/"
 }

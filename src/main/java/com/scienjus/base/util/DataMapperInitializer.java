@@ -1,6 +1,9 @@
 package com.scienjus.base.util;
 
 import org.apache.commons.lang.StringUtils;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.ScannedGenericBeanDefinition;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
@@ -11,6 +14,7 @@ import org.springframework.core.type.classreading.MetadataReaderFactory;
 import org.springframework.util.SystemPropertyUtils;
 
 import javax.annotation.PostConstruct;
+import javax.sql.DataSource;
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.util.*;
@@ -18,18 +22,27 @@ import java.util.*;
 /**
  * Created by Administrator on 2015/8/30.
  */
+@Configuration
+@ConfigurationProperties("initializer")
 public class DataMapperInitializer {
 
     private String scanDomainPackage;
 
-    public DataMapperInitializer(String scanDomainPackage) {
+    public void setScanDomainPackage(String scanDomainPackage) {
         this.scanDomainPackage = scanDomainPackage;
     }
 
+    @Bean(name = "dataSource", destroyMethod = "close")
+    @ConfigurationProperties("dataSource")
+    public DataSource dataSource() {
+        return new org.apache.tomcat.jdbc.pool.DataSource();
+    }
+
+
     @PostConstruct
     public void init() throws Exception {
-        Set<Class> clazzs = new HashSet<>();
-        for (Class clazz : clazzs) {
+        Set<Class> classes = scanClass();
+        for (Class clazz : classes) {
             initTableMapper(clazz);
         }
     }
@@ -93,7 +106,7 @@ public class DataMapperInitializer {
                 MetadataReader metadataReader = metadataReaderFactory
                         .getMetadataReader(resource);
                 ScannedGenericBeanDefinition scan = new ScannedGenericBeanDefinition(metadataReader);
-                if (scan.getMetadata().hasAnnotatedMethods(Table.class.getName())) {
+                if (scan.getMetadata().hasAnnotation(Table.class.getName())) {
                     try {
                         classes.add(Class.forName(metadataReader
                                 .getClassMetadata().getClassName()));

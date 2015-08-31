@@ -1,9 +1,9 @@
 package com.scienjus.base.dao;
 
 import com.scienjus.base.domain.BaseDomain;
-import com.scienjus.base.util.Table;
 import com.scienjus.base.util.TableUtil;
 import com.sun.deploy.util.StringUtils;
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.sql.DataSource;
@@ -22,6 +22,8 @@ import java.util.Map;
  * @date 2015/8/19.
  */
 public abstract class SimpleDataMapper<E extends BaseDomain> {
+
+    private static final Logger LOGGER = Logger.getLogger(SimpleDataMapper.class);
 
     @Autowired
     protected DataSource dataSource;
@@ -90,10 +92,10 @@ public abstract class SimpleDataMapper<E extends BaseDomain> {
     }
 
     public E getEntity(Object... args) {
+        String sql = TableUtil.getSelectSQL(this.getEntityClass()).concat(TableUtil.getIdSelect(this.getEntityClass()));
+        LOGGER.info(sql);
         try (Connection con = dataSource.getConnection();
-             PreparedStatement statement = con.prepareStatement(
-                     TableUtil.getSelectSQL(this.getEntityClass())
-                             .concat(TableUtil.getIdSelect(this.getEntityClass())))) {
+             PreparedStatement statement = con.prepareStatement(sql)) {
             int i = 1;
             for (Object arg : args) {
                 if (arg instanceof Boolean) {
@@ -114,10 +116,10 @@ public abstract class SimpleDataMapper<E extends BaseDomain> {
     }
 
     public List<E> findEntity(String where, Object... args) {
+        String sql = TableUtil.getSelectSQL(this.getEntityClass()).concat(where);
+        LOGGER.info(sql);
         try (Connection con = dataSource.getConnection();
-             PreparedStatement statement = con.prepareStatement(
-                     TableUtil.getSelectSQL(this.getEntityClass())
-                             .concat(where))) {
+             PreparedStatement statement = con.prepareStatement(sql)) {
             int i = 1;
             for (Object arg : args) {
                 if (arg instanceof Boolean) {
@@ -139,7 +141,7 @@ public abstract class SimpleDataMapper<E extends BaseDomain> {
         return null;
     }
 
-    protected abstract E convertEntity(ResultSet rs);
+    protected abstract E convertEntity(ResultSet rs) throws SQLException;
 
     protected abstract Class getEntityClass();
 
@@ -155,6 +157,9 @@ public abstract class SimpleDataMapper<E extends BaseDomain> {
         values.deleteCharAt(values.length() - 1);
 
         String sql = String.format("insert into %s (%s) values (%s)", tableName, fields.toString(), values.toString());
+
+        LOGGER.info(sql);
+
         PreparedStatement statement = con.prepareStatement(sql, PreparedStatement.RETURN_GENERATED_KEYS);
         int i = 1;
         for (Object value : changeFields.values()) {
@@ -182,7 +187,10 @@ public abstract class SimpleDataMapper<E extends BaseDomain> {
             values.add(field.concat(" = ?"));
         }
 
-        String sql = String.format("update %s set %s where %s", tableName, StringUtils.join(keys, ", "), StringUtils.join(keys, " and "));
+        String sql = String.format("update %s set %s where %s", tableName, StringUtils.join(values, ", "), StringUtils.join(keys, " and "));
+
+        LOGGER.info(sql);
+
         PreparedStatement statement = con.prepareStatement(sql);
         int i = 1;
         for (Object value : changeFields.values()) {
@@ -210,9 +218,11 @@ public abstract class SimpleDataMapper<E extends BaseDomain> {
             keys.add(primaryKey.concat(" = ?"));
         }
 
-        String sql = String.format("delete %s where %s", tableName, StringUtils.join(keys, " and "));
-        PreparedStatement statement = con.prepareStatement(sql);
+        String sql = String.format("delete from %s where %s", tableName, StringUtils.join(keys, " and "));
 
+        LOGGER.info(sql);
+
+        PreparedStatement statement = con.prepareStatement(sql);
         int i = 1;
         for (Method getMethod : primaryKeyGetMethods.values()) {
             Object value = getMethod.invoke(domain);

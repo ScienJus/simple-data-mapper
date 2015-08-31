@@ -3,18 +3,19 @@ package com.scienjus.instance.dao.impl;
 import com.scienjus.base.dao.SimpleDataMapper;
 import com.scienjus.instance.dao.UserDao;
 import com.scienjus.instance.domain.User;
+import org.springframework.stereotype.Repository;
 
-import java.lang.reflect.Method;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Created by Administrator on 2015/8/30.
  */
-public class UserDapImpl extends SimpleDataMapper<User> implements UserDao {
+@Repository
+public class UserDaoImpl extends SimpleDataMapper<User> implements UserDao {
     @Override
-    protected User convertEntity(ResultSet rs) {
+    protected User convertEntity(ResultSet rs) throws SQLException {
         return new User(rs);
     }
 
