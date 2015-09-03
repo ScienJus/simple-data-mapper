@@ -7,6 +7,7 @@ import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.sql.DataSource;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -29,6 +30,10 @@ public abstract class SimpleDataMapper<E extends BaseDomain> {
     protected DataSource dataSource;
 
     public void insertEntity(E domain) {
+        if (TableUtil.isAutoKey(this.getEntityClass())) {
+            insertAutoKeyEntity(domain);
+            return;
+        }
         try (Connection con = dataSource.getConnection()) {
             try (PreparedStatement statement = buildInsertStatement(
                     con,
@@ -37,10 +42,6 @@ public abstract class SimpleDataMapper<E extends BaseDomain> {
                 con.setAutoCommit(false);
                 statement.executeUpdate();
                 con.commit();
-//                ResultSet rs = statement.getGeneratedKeys();
-//                if (rs.next()) {
-//                    return rs.getInt(1);
-//                }
             } catch (SQLException e) {
                 con.rollback();
             } finally {
@@ -49,6 +50,31 @@ public abstract class SimpleDataMapper<E extends BaseDomain> {
         } catch (SQLException e) {
             //...
         }
+    }
+
+    public void insertAutoKeyEntity(E domain) {
+        try (Connection con = dataSource.getConnection()) {
+            try (PreparedStatement statement = buildAutoKeyInsertStatement(
+                    con,
+                    TableUtil.getTableName(this.getEntityClass()),
+                    domain.getChangeFields())) {
+                con.setAutoCommit(false);
+                statement.executeUpdate();
+                con.commit();
+                ResultSet rs = statement.getGeneratedKeys();
+                if (rs.next()) {
+                    Method idSetter = TableUtil.getAutoKeySetter(this.getEntityClass());
+                    idSetter.invoke(domain, rs.getLong(1));
+                }
+            } catch (Exception e) {
+                con.rollback();
+            } finally {
+                domain.clearChangeFields();
+            }
+        } catch (SQLException e) {
+            //...
+        }
+
     }
 
     public void updateEntity(E domain) {
@@ -145,8 +171,35 @@ public abstract class SimpleDataMapper<E extends BaseDomain> {
 
     protected abstract Class getEntityClass();
 
-    private PreparedStatement buildInsertStatement(Connection con, String tableName,
-                                                   Map<String, Object> changeFields) throws SQLException {
+    protected PreparedStatement buildInsertStatement(Connection con, String tableName,
+                                                     Map<String, Object> changeFields) throws SQLException {
+        StringBuilder fields = new StringBuilder();
+        StringBuilder values = new StringBuilder();
+        for (String field : changeFields.keySet()) {
+            fields.append(field).append(",");
+            values.append("?").append(",");
+        }
+        fields.deleteCharAt(fields.length() - 1);
+        values.deleteCharAt(values.length() - 1);
+
+        String sql = String.format("insert into %s (%s) values (%s)", tableName, fields.toString(), values.toString());
+
+        LOGGER.info(sql);
+
+        PreparedStatement statement = con.prepareStatement(sql);
+        int i = 1;
+        for (Object value : changeFields.values()) {
+            if (value instanceof Boolean) {
+                statement.setBoolean(i++, (Boolean) value);
+            } else {
+                statement.setString(i++, value.toString());
+            }
+        }
+        return statement;
+    }
+
+    protected PreparedStatement buildAutoKeyInsertStatement(Connection con, String tableName,
+                                                     Map<String, Object> changeFields) throws SQLException {
         StringBuilder fields = new StringBuilder();
         StringBuilder values = new StringBuilder();
         for (String field : changeFields.keySet()) {

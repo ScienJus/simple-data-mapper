@@ -1,15 +1,15 @@
 {
   "dataSource" : {
     "driver": "com.mysql.jdbc.Driver",
-    "url": "jdbc:mysql://127.0.0.1:3306/triphare_1?remarksReporting=true&useInformationSchema=true",
-    "username" : "root",
-    "password" : "root"
+    "url": "jdbc:mysql://127.0.0.1:3307/simple_data_mapper?remarksReporting=true&useInformationSchema=true",
+    "username" : "xieenlong",
+    "password" : "xieenlong"
   },
   "packages" : {
     "domain" : "com.scienjus.domain",
     "dao" : "com.scienjus.dao",
     "daoImpl" : "com.scienjus.dao.impl"
   },
-  "tables" : ["user_", "acount_", "note_info", "praise_", "fans_", "together_"],
-  "path" : "D:/"
+  "tables" : ["user_"],
+  "path" : "/Users/xieenlong"
 }

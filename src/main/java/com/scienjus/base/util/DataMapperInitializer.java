@@ -55,7 +55,14 @@ public class DataMapperInitializer {
             String[] keys = table.keys();
             TableUtil.setIdSelect(clazz, buildIdSelect(keys));
             TableUtil.setPrimaryKeyGetters(clazz, buildPrimaryKeyGetters(clazz, keys));
+            if (table.isAutoKey()) {
+                TableUtil.setAutoKeySetter(clazz, buildAutoKeySetter(clazz, keys[0]));
+            }
         }
+    }
+
+    private Method buildAutoKeySetter(Class clazz, String key) throws NoSuchMethodException {
+        return clazz.getMethod(getFieldSetterName(key), long.class);
     }
 
     private Map<String, Method> buildPrimaryKeyGetters(Class clazz, String[] keys) throws NoSuchMethodException {
@@ -79,6 +86,19 @@ public class DataMapperInitializer {
         }
         return getterName.toString();
     }
+
+    private static String getFieldSetterName(String field) {
+        String[] temp = field.split("_");
+        StringBuilder getterName = new StringBuilder("set");
+        for (int i = 0; i < temp.length; i++) {
+            char[] chars = temp[i].toCharArray();
+            chars[0]=Character.toUpperCase(chars[0]);
+            temp[i] = new String(chars);
+            getterName.append(temp[i]);
+        }
+        return getterName.toString();
+    }
+
 
     private String buildIdSelect(String[] keys) {
         List<String> fields = new ArrayList<>();

@@ -222,7 +222,12 @@ public class DataMapperGenerator {
         //表注释
         writer.format("// %s\r\n", table.getComment());
         //注解
-        writer.format("@Table(name = \"%s\", keys = {%s}, selectSQL = \"%s\")\r\n", table.getName(), getPrimaryKeys(table), getSelectSQL(table));
+        writer.format("@Table(name = \"%s\", keys = {%s}, selectSQL = \"%s\"", table.getName(), getPrimaryKeys(table), getSelectSQL(table));
+        if (table.getPrimaryKeys().size() == 1 && table.getPrimaryKeys().get(0).isAutoKey()) {
+            writer.println(", isAutoKey = true)");
+        } else {
+            writer.println(")");
+        }
         //声明类
         writer.format("public class %s extends BaseDomain {\r\n", getClassName(table));
         for (FieldMeta field : table.getFields()) {
@@ -289,6 +294,9 @@ public class DataMapperGenerator {
     }
 
     private static String getFieldType(FieldMeta field) {
+        if (field.isAutoKey()) {
+            return long.class.getSimpleName();
+        }
         switch (field.getType()) {
             case Types.NVARCHAR:
             case Types.LONGNVARCHAR:

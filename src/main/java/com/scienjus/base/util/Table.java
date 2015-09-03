@@ -16,4 +16,6 @@ public @interface Table {
     public String[] keys();
 
     public String selectSQL();
+
+    public boolean isAutoKey() default false;
 }

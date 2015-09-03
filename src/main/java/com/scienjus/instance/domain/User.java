@@ -8,7 +8,7 @@ import java.sql.SQLException;
 /**
  * Created by Administrator on 2015/8/30.
  */
-@Table(name = "user_", keys = {"id_"}, selectSQL = "select a.id_, a.username_, a.password_ from user_ a ")
+@Table(name = "user_", keys = {"id_"}, selectSQL = "select a.id_, a.username_, a.password_ from user_ a ", isAutoKey = true)
 public class User extends BaseDomain {
 
     private long id;

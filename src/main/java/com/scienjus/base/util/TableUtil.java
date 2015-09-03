@@ -14,6 +14,7 @@ public class TableUtil {
     public static final Map<Class, Map<String, Method>> PRIMARY_KEY_GETTERS_MAP = new HashMap<>();
     public static final Map<Class, String> ID_SELECT_MAP = new HashMap<>();
     public static final Map<Class, String> SELECT_SQL_MAP = new HashMap<>();
+    public static final Map<Class, Method> AUTO_KEY_SETTER_MAP = new HashMap<>();
 
     public static String getTableName(Class clazz) {
         return TABLE_NAME_MAP.get(clazz);
@@ -45,6 +46,18 @@ public class TableUtil {
 
     public static void setSelectSQL(Class clazz, String tableName) {
         SELECT_SQL_MAP.put(clazz, tableName);
+    }
+
+    public static void setAutoKeySetter(Class clazz, Method setter) {
+        AUTO_KEY_SETTER_MAP.put(clazz, setter);
+    }
+
+    public static Method getAutoKeySetter(Class clazz) {
+        return AUTO_KEY_SETTER_MAP.get(clazz);
+    }
+
+    public static boolean isAutoKey(Class clazz) {
+        return AUTO_KEY_SETTER_MAP.get(clazz) != null;
     }
 
 }
