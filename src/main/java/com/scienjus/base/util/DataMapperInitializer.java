@@ -62,7 +62,7 @@ public class DataMapperInitializer {
     }
 
     private Method buildAutoKeySetter(Class clazz, String key) throws NoSuchMethodException {
-        return clazz.getMethod(getFieldSetterName(key), long.class);
+        return clazz.getMethod(getFieldSetterName(key), Long.class);
     }
 
     private Map<String, Method> buildPrimaryKeyGetters(Class clazz, String[] keys) throws NoSuchMethodException {

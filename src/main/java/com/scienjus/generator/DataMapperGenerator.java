@@ -82,7 +82,7 @@ public class DataMapperGenerator {
         if (!dir.exists()) {
             dir.mkdirs();
         }
-        PrintWriter writer = new PrintWriter(new BufferedWriter(new FileWriter(dirPath + "/" + getClassName(table) + "DaoImpl.java")));
+        PrintWriter writer = new PrintWriter(new BufferedWriter(new OutputStreamWriter(new FileOutputStream(dirPath + "/" + getClassName(table) + "DaoImpl.java"), "utf-8")));
         //声明包
         writer.format("package %s;\r\n", packages.getDaoImpl());
         writer.println();
@@ -109,7 +109,7 @@ public class DataMapperGenerator {
         //getClass方法
         writer.println("\t@Override");
         writer.println("\tprotected Class getEntityClass() {");
-        writer.format("\t\treturn %s.getClass();\r\n", getClassName(table));
+        writer.format("\t\treturn %s.class;\r\n", getClassName(table));
         writer.println("\t}");
         writer.println();
         //insert方法
@@ -159,7 +159,7 @@ public class DataMapperGenerator {
         if (!dir.exists()) {
             dir.mkdirs();
         }
-        PrintWriter writer = new PrintWriter(new BufferedWriter(new FileWriter(dirPath + "/" + getClassName(table) + "Dao.java")));
+        PrintWriter writer = new PrintWriter(new BufferedWriter(new OutputStreamWriter(new FileOutputStream(dirPath + "/" + getClassName(table) + "Dao.java"), "utf-8")));
         //声明包
         writer.format("package %s;\r\n", packages.getDao());
         writer.println();
@@ -209,7 +209,7 @@ public class DataMapperGenerator {
         if (!dir.exists()) {
             dir.mkdirs();
         }
-        PrintWriter writer = new PrintWriter(new BufferedWriter(new FileWriter(dirPath + "/" + getClassName(table) + ".java")));
+        PrintWriter writer = new PrintWriter(new BufferedWriter(new OutputStreamWriter(new FileOutputStream(dirPath + "/" + getClassName(table) + ".java"), "utf-8")));
         //声明包
         writer.format("package %s;\r\n", aPackage);
         writer.println();
@@ -236,6 +236,19 @@ public class DataMapperGenerator {
             writer.format("\tprivate %s %s;\r\n", getFieldType(field), getFieldName(field));
         }
         writer.println();
+        //声明无参构造方法
+        writer.format("\tpublic %s() {\r\n", getClassName(table));
+        writer.println("\t\tsuper();");
+        writer.println("\t}");
+        writer.println();
+        //声明转换构造方法
+        writer.format("\tpublic %s(ResultSet rs) throws SQLException {\r\n", getClassName(table));
+        int i = 1;
+        for (FieldMeta field : table.getFields()) {
+            writer.format("\t\tthis.%s = rs.get%s(%d);\r\n", getFieldName(field), getFieldType(field), i++);
+        }
+        writer.println("}");
+        writer.println();
         for (FieldMeta field : table.getFields()) {
             //声明get方法
             writer.format("\tpublic %s get%s() {\r\n", getFieldType(field), getFieldMethodName(field));
@@ -245,7 +258,7 @@ public class DataMapperGenerator {
             //声明set方法
             writer.format("\tpublic void set%s(%s %s) {\r\n", getFieldMethodName(field), getFieldType(field), getFieldName(field));
             writer.format("\t\tthis.%s = %s;\r\n", getFieldName(field), getFieldName(field));
-            writer.format("\t\tthis.changeField.put(\"%s\", %s);\r\n", field.getName(), getFieldName(field));
+            writer.format("\t\tthis.changeFields.put(\"%s\", %s);\r\n", field.getName(), getFieldName(field));
             writer.format("\t}\r\n");
             writer.println();
 
@@ -295,7 +308,7 @@ public class DataMapperGenerator {
 
     private static String getFieldType(FieldMeta field) {
         if (field.isAutoKey()) {
-            return long.class.getSimpleName();
+            return Long.class.getSimpleName();
         }
         switch (field.getType()) {
             case Types.NVARCHAR:
@@ -306,16 +319,16 @@ public class DataMapperGenerator {
                 return String.class.getSimpleName();
             case Types.SMALLINT:
             case Types.TINYINT:
-                return int.class.getSimpleName();
+                return Integer.class.getSimpleName();
             case Types.INTEGER:
-                return long.class.getSimpleName();
+                return Long.class.getSimpleName();
             case Types.BIT:
             case Types.BOOLEAN:
-                return boolean.class.getSimpleName();
+                return Boolean.class.getSimpleName();
             case Types.BIGINT:
-                return long.class.getSimpleName();
+                return Long.class.getSimpleName();
             case Types.FLOAT:
-                return float.class.getSimpleName();
+                return Float.class.getSimpleName();
             case Types.BLOB:
                 return Blob.class.getSimpleName();
             case Types.DATE:
@@ -328,7 +341,7 @@ public class DataMapperGenerator {
                 return URL.class.getSimpleName();
             case Types.DOUBLE:
             case Types.REAL:
-                return double.class.getSimpleName();
+                return Double.class.getSimpleName();
             default:
                 return null;
         }
