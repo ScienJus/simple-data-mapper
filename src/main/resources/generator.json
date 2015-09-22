@@ -1,9 +1,9 @@
 {
   "dataSource" : {
-    "driver": "com.mysql.jdbc.Driver",
-    "url": "a",
-    "username" : "xieenlong",
-    "password" : "xieenlong"
+    "driver": "your db driver class",
+    "url": "your jdbc url",
+    "username" : "your username",
+    "password" : "your password"
   },
   "packages" : {
     "domain" : "com.scienjus.instance.domain",
@@ -11,5 +11,5 @@
     "daoImpl" : "com.scienjus.instance.dao.impl"
   },
   "tables" : ["user_"],
-  "path" : "/Users/xieenlong/Java/SimpleDataMapper/src/main/java"
+  "path" : "your file path"
 }
